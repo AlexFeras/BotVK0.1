@@ -1,0 +1,17 @@
+{
+  "TEAMS": [
+    {
+      "TEAM_NAME": "Команда 1",
+      "Team_id": 183
+    },
+    {
+
+    "TEAM_NAME": "Команда 2",
+    "Team_id": 145
+    },
+    {
+      "TEAM_NAME": "team3",
+     "Team_id": 1457
+    }
+  ]
+}
