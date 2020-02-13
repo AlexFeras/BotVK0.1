@@ -3,7 +3,7 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import json
 import requests
 import wget #скачать её
-
+#from Counter import *
 
 
 def get_button(label='but', color='red', payload=''):
@@ -15,7 +15,8 @@ def get_button(label='but', color='red', payload=''):
         },
         "color": color
     }
-
+# k=day_t() модуль работает, но бот тогда не работает)))
+# print(k)
 
 if __name__ == "__main__":
     token = 'c713225662ae3c53a7f659faa894c5bfbf940208aaf60148ba34bf29289c54f82d2f3cd92cec8e466aa4a'
@@ -48,7 +49,7 @@ if __name__ == "__main__":
                                     'random_id': 0})
         # для работоспособности кода ниже - необходим standalone token
         upload_url = vk.method('photos.getUploadServer',
-                               {'access_token': token, 'group_id': group_id, 'album_id': album_id})['upload_url']
+                               {'access_token': access_token, 'group_id': group_id, 'album_id': album_id})['upload_url']
         info = requests.post(upload_url, files={'photo': open(file, 'rb')}).json()
         vk.method('photos.save', {'server': info['server'],
                                   'photos_list': info['photos_list'],
@@ -86,13 +87,11 @@ if __name__ == "__main__":
                                             'random_id': 0})
 
                  #-------код что ниже, при запуске вырубает бота. Идёт ошибка
-                 # url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
-                 # messages = vk.method("messages.getConversations", {'offset': 0, 'count':20, 'filter':'unread'})
-                 # id = messages['items'][0]['last_message']['peer_id'] #id отправителя
-                 # body = messages['items'][0]['last_message']['text']# сам текст
-                 # photo(id, url, group_id, album_id, 269997215)
-
-
+                 url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
+                 messages = vk.method("messages.getConversations", {'offset': 0, 'count': 20, 'filter':'unread'})
+                 id = event.object.message['peer_id'] #id отправителя
+                 body = event.object.message['text']# сам текст
+                 #photo(id, url, group_id, album_id, 269997215)
 
 
 

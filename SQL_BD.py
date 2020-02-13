@@ -5,9 +5,6 @@ from sqlalchemy.orm import sessionmaker
 from random import randint
 from sqlalchemy.orm import relationship
 import json
-import sys
-import codecs
-
 
 
 base = declarative_base()
@@ -41,8 +38,6 @@ class Team(base):
         return self.team_name #то, что будем выводить
 
 
-sys.stdout = codecs.getwriter("utf-8")(sys.stdout.detach())
-
 engine = create_engine("sqlite:///tasks.db",echo=True)
 base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
@@ -66,7 +61,7 @@ def insert_user(uid, name, team):
     insert(user)
 def file_pars(file_name):
     with open(file_name, 'r') as read_file:
-        team = json.load(read_file)
+        team = json.load(read_file, encoding='utf-8')
         for i in team["TEAMS"]:
             d=Team(i["Team_id"],i["TEAM_NAME"])
             s.add(d)
@@ -75,6 +70,5 @@ file_pars("team1.json")
 t = s.query(Team)
 
 for i in t: #в i  определнный объект из базы
-    k=i.encode('utf-8')
-    print(k)
+    print(i)
 
