@@ -60,13 +60,13 @@ def insert_user(uid, name, team):
     user=User(uid, name, team)
     insert(user)
 def file_pars(file_name):
-    with open(file_name, 'r') as read_file:
-        team = json.load(read_file, encoding='utf-8')
+    with open(file_name, 'r', encoding='utf-8') as read_file:
+        team = json.load(read_file)
         for i in team["TEAMS"]:
             d=Team(i["Team_id"],i["TEAM_NAME"])
             s.add(d)
     s.commit()#сохраняет изменения
-file_pars("team1.json")
+file_pars("teams.json")
 t = s.query(Team)
 
 for i in t: #в i  определнный объект из базы
