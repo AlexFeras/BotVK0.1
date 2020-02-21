@@ -4,7 +4,10 @@ import json
 import requests
 import wget
 from Base import getpicture, Counter, day_t, hour_t,Counter_d,Data,Debt,Save
+from Admin_function import get_Admin_statistic
 import os
+from random import choice
+
 
 def get_button(label='but', color='red', payload=''):
     return {
@@ -17,7 +20,8 @@ def get_button(label='but', color='red', payload=''):
     }
 
 if __name__ == "__main__":
-
+    token = '66109476bc22807faf8778764497aa3ea03e494967b8f32c5092e24cb4cf035a48cd22563bea5ab9a16fa'
+    acess_token = 'ef2a9e430fc2af0256102ca057db31a108cc2c9316d354b4138aaa74eabe3b5b841a0910c93f7eeff4ad6'
     group_id = 191601892
     album_id = 270167491
     vk_message = vk_api.VkApi(token=token)
@@ -46,7 +50,7 @@ if __name__ == "__main__":
         "one_time": False,
         "buttons": [
             [get_button(label="Получить статистику за день и за неделю", color='positive')], [get_button(label="Получить таблицу учатстников", color='positive')],
-            [get_button(label="Загрузить таблицу участников", color='positive')], [get_button(label="Очистить группу", color='negative')]
+            [get_button(label="Загрузить таблицу участников", color='positive')], [get_button(label="Очистить группу", color='negative')], [get_button(label="1", color='negative')], [get_button(label="2", color='negative')]
         ]
     }
 
@@ -95,9 +99,10 @@ if __name__ == "__main__":
             if flag == True:
                 if event.object.message['attachments']:
                     if event.object.message['attachments'][0]['type'] == 'photo':  # photo
+                        #vk_photo.method('photos.get',{'owner_id':group_id,'album_id': 270572910}) #рандомная выборка из альбома
                         vk_message.method('messages.send',
                                   {"peer_id": event.object.message['peer_id'],  # выведет ок если пришло фото
-                                   'attachment': 'photo-191601892_457239019',
+                                   'attachment': choice( vk_photo.method('photos.get',{'owner_id':group_id,'album_id': 270572910}))['response']['sizes'][5]['url'],
                                    'random_id': 0})
                         url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
                         messages = vk_message.method("messages.getConversations",
@@ -138,14 +143,24 @@ if __name__ == "__main__":
                                         'message': "",
 
                                         'random_id': 0})
+                        Choice=choice(vk_photo.method('photos.get', {'owner_id': group_id,
+                                                              'album_id': 270572910}))['response']['sizes'][5]['url']
+                        vk_message.method('messages.send',
+                                          {"peer_id": event.object.message['peer_id'],
+                                           'attachment': Choice, 'random_id': 0})
+
                         url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
                         messages = vk_message.method("messages.getConversations",
                                                 {'offset': 0, 'count': 20, 'filter': 'unread'})
                         id = event.object.message['peer_id']  # id отправителя
                         body = event.object.message['text']  # сам текст
-                        photo(id, url, group_id, album_id)
-                        getpicture(event.object.message['peer_id'], 0.5, True)
-                        Counter()
+                        album_Com_id = vk_photo.method('photos.createAlbum',# создает альбом для конкурсов
+                                                   {'title': str(day_t() + 1) + " День. Конкурсы, ", 'group_id': group_id})['id']
+                        photo(id, url, group_id, album_Com_id)
+                        getpicture(event.object.message['peer_id'], 0, 2)
+                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                            'message': "Отлично, работа принята!",
+                                                            'random_id': 0})
                         flag_C = False
 
             if event.object.message['text'].lower() == 'начать':# обратились к сообщению, образаемся к "тексту"
@@ -174,38 +189,46 @@ if __name__ == "__main__":
                     vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                         'message': "Вы сдали все долги!",
                                                         'random_id': 0})
-            # elif "Сдать на конкурс" in event.object.message['text']:
-            #     if Data(event.object.message['peer_id']) <= 0:
-            #         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
-            #                                             'message': "Отлично, работа принята!",
-            #                                             'random_id': 0})
-            #     else:
-            #         flag_C=True
-            #         vk_message.method('messages.getConversations', {"peer_id": event.object.message['peer_id'],
-            #                                  'message': "Загружай на конкурс",
-            #                                  'random_id': 0})
+                else:
+                    flag1 = True
+                    vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                        'message': "Загружайте долг",
+                                                        'random_id': 0})
+            elif "Сдать на конкурс" in event.object.message['text']:
+
+                vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                             'message': "Загружай на конкурс",
+                                             'random_id': 0})
+                flag_C = True
             elif "Admin" in event.object.message['text']:  # если нажать на кнопку, то проиходйет это
-                if event.object.message['attachments'][0]['type'] == 'document':  #новая база
+                if event.object.message['attachments'][0]['type'] == 'Docs':  #новая база
                     url_users = event.object.message['attachments']['document']['url']
                     url_team  = event.object.message['attachments']['document']['url']
                     a = vk_photo.method("photos.getMessagesUploadServer") # поулчить стандалон для фото и документов
                     file_users = wget.download(url_users)  # сохраняем файл
                     file_team = wget.download(url_team)
-                    b = requests.post(a['upload_url'], files={'file': open(file, 'rb')}).json()
-                    c = vk_photo.method('photos.save', {'document': b["file"],
-                                                                     'server': b['server'],
-                                                                     'hash': b['hash']})[0]
-                    Save(file_users,file_team)
+                    b1 = requests.post(a['upload_url'], files={'file': open(file_users, 'rb')}).json()
+                    b2 = requests.post(a['upload_url'], files={'file': open(file_team, 'rb')}).json()
+                    c = vk_photo.method('photos.save', {'Docs': b1["file"],
+                                                                     'server': b1['server'],
+                                                                     'hash': b1['hash']})[0]
+                    Save(file_users, file_team)
                     os.remove(file_users)
                     os.remove(file_team)
 
 
-            if event.object.message['text'].lower() == 'начать_админ':
+            elif event.object.message['text'].lower() == 'начать_админ':
                 a = vk_message.method('users.get', {'user_ids': event.object.message['peer_id']})
                 a = a[0]['first_name']
                 vk_message.method("messages.send", {"peer_id": event.object.message['peer_id'],
                                                     'message': 'Привет, администратор  '+str(a),
                                                     'random_id': 0, 'keyboard': keyboard_Admin})
+
+            elif 'Получить статистику за день и за неделю' in event.object.message['text']:
+                for i,g,k in get_Admin_statistic():
+                    vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                    'message': f'{i} {g} {k}',
+                                                    'random_id': 0})
 
 
 

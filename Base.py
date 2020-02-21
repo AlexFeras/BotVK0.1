@@ -32,19 +32,18 @@ def Counter_d():
 
 def getpicture(user_id,ball,debt):
     users = pd.read_csv('users.csv', sep=';', encoding='windows-1251', engine='python')
-    #teams = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
+    team = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
     print(users.head())
     users.loc[users['id'] == user_id, 'баллы'] += ball
-    if debt==False:
-        users.loc[users['id'] == user_id, 'долги'] = day_t()
-    else:
+    team.loc[team[team['им команды']==users[users['id'] == user_id]['команды']], 'баллы за день'] += ball
+    if debt==0:
+        users.loc[users['id'] == user_id, 'дата'] = day_t()
+    elif debt==1:
         users.loc[users['id'] == user_id, 'долги'] -= 1
     print(users.head())
     users = users.drop('Unnamed: 0', axis=1, errors='ignore')
     users.to_csv('users.csv', sep=';', encoding='windows-1251')
-
-
-
+    team.to_csv('team.csv', sep=';', encoding='windows-1251')
 
 
 def Counter():
