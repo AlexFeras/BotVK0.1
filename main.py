@@ -17,8 +17,8 @@ def get_button(label='but', color='red', payload=''):
     }
 
 if __name__ == "__main__":
-    token =
-    acess_token =
+    token = '66109476bc22807faf8778764497aa3ea03e494967b8f32c5092e24cb4cf035a48cd22563bea5ab9a16fa'
+    acess_token = 'ef2a9e430fc2af0256102ca057db31a108cc2c9316d354b4138aaa74eabe3b5b841a0910c93f7eeff4ad6'
     group_id = 191601892
     album_id = 270167491
     vk_message = vk_api.VkApi(token=token)
@@ -32,8 +32,23 @@ if __name__ == "__main__":
         "one_time": False,
         "buttons": [
                     [get_button(label="Приветствие", color='positive')],[get_button(label="Сдать работу", color='positive')],
-            [get_button(label="Сдать долг!", color='positive')]
+            [get_button(label="Сдать долг!", color='positive')],[get_button(label="Сдать на конкурс", color='positive')]
                     ]
+    }
+
+    keyboard_Leader = {  # создаем клавиатуру Старосты
+        "one_time": False,
+        "buttons": [
+            [get_button(label="Приветствие", color='positive')], [get_button(label="Сдать работу", color='positive')],
+            [get_button(label="Сдать долг!", color='positive')]
+        ]
+    }
+    keyboard_Admin = {  # создаем клавиатуру Админа
+        "one_time": False,
+        "buttons": [
+            [get_button(label="Получить статистику за день и за неделю", color='positive')], [get_button(label="Получить таблицу учатстников", color='positive')],
+            [get_button(label="Загрузить таблицу участников", color='positive')], [get_button(label="Очистить группу", color='negative')]
+        ]
     }
 
 
@@ -59,16 +74,20 @@ if __name__ == "__main__":
         os.remove(file)
 
     keyboard = str(json.dumps(keyboard, ensure_ascii=False))# переводим в строковый тип, так как не может принимать словарь
+    keyboard_Leader=str(json.dumps(keyboard_Leader, ensure_ascii=False))
+    keyboard_Admin=str(json.dumps(keyboard_Admin, ensure_ascii=False))
     longpoll = VkBotLongPoll(vk_message, group_id) #событие, наблюдаем за некоторой событийной моделью
     flag=False
     flag1=False
     flag2=0
+    flag_C=False
     for event in longpoll.listen():
         if (hour_t() >= 1320) and (hour_t()<1380):
             flag2=1
-        elif hour_t()>=1243:
-            flag2=2
-            album_id = vk_photo.method('photos.createAlbum', {'title': str(day_t()) + " День", 'group_id': group_id})['id']
+        elif hour_t()>=1380:
+            if flag2!=0:
+                flag2 = 0
+                album_id = vk_photo.method('photos.createAlbum', {'title': str(day_t()+1) + " День", 'group_id': group_id})['id']
         else:
             if flag2!=0:
                 Counter_d()
@@ -92,14 +111,15 @@ if __name__ == "__main__":
                         if flag2 == 1:# медлу 22-00 и 23-00
                             getpicture(event.object.message['peer_id'], 1, False)
                         if flag2 == 2:#опоздал
-                            getpicture(event.object.message['peer_id'], 3, False)
+                            getpicture(event.object.message['peer_id'], 0, False)
                         Counter()
                         flag = False
             if flag1 == True:
                 if event.object.message['attachments']:
                     if event.object.message['attachments'][0]['type'] == 'photo':  # photo
-                        vk_message.method('messages.send',
+                        vk_message.method('messages.getConversations',
                                     {"peer_id": event.object.message['peer_id'],  # выведет ок если пришло фото
+                                        'message': "",
                                         'attachment': 'photo-191561475_457239022',
                                         'random_id': 0})
                         url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
@@ -111,6 +131,23 @@ if __name__ == "__main__":
                         getpicture(event.object.message['peer_id'], 0.5, True)
                         Counter()
                         flag1 = False
+            if flag_C == True:
+                if event.object.message['attachments']:
+                    if event.object.message['attachments'][0]['type'] == 'photo':  # photo
+                        vk_message.method('messages.getConversations',
+                                    {"peer_id": event.object.message['peer_id'],  # выведет ок если пришло фото
+                                        'message': "",
+
+                                        'random_id': 0})
+                        url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
+                        messages = vk_message.method("messages.getConversations",
+                                                {'offset': 0, 'count': 20, 'filter': 'unread'})
+                        id = event.object.message['peer_id']  # id отправителя
+                        body = event.object.message['text']  # сам текст
+                        photo(id, url, group_id, album_id)
+                        getpicture(event.object.message['peer_id'], 0.5, True)
+                        Counter()
+                        flag_C = False
 
             if event.object.message['text'].lower() == 'начать':# обратились к сообщению, образаемся к "тексту"
                 vk_message.method("messages.send", {"peer_id": event.object.message['peer_id'],
@@ -138,15 +175,20 @@ if __name__ == "__main__":
                     vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                         'message': "Вы сдали все долги!",
                                                         'random_id': 0})
-                else:
-                    flag1=True
-                    vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
-                                             'message': "Загружай долг!",
-                                             'random_id': 0})
+            # elif "Сдать на конкурс" in event.object.message['text']:
+            #     if Data(event.object.message['peer_id']) <= 0:
+            #         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+            #                                             'message': "Отлично, работа принята!",
+            #                                             'random_id': 0})
+            #     else:
+            #         flag_C=True
+            #         vk_message.method('messages.getConversations', {"peer_id": event.object.message['peer_id'],
+            #                                  'message': "Загружай на конкурс",
+            #                                  'random_id': 0})
             elif "Admin" in event.object.message['text']:  # если нажать на кнопку, то проиходйет это
                 if event.object.message['attachments'][0]['type'] == 'document':  #новая база
-                    url_users = event.object.message['attachments'][0]['document']['url']
-                    url_team  = event.object.message['attachments'][0]['document']['url']
+                    url_users = event.object.message['attachments']['document']['url']
+                    url_team  = event.object.message['attachments']['document']['url']
                     a = vk_photo.method("photos.getMessagesUploadServer") # поулчить стандалон для фото и документов
                     file_users = wget.download(url_users)  # сохраняем файл
                     file_team = wget.download(url_team)
@@ -157,6 +199,14 @@ if __name__ == "__main__":
                     Save(file_users,file_team)
                     os.remove(file_users)
                     os.remove(file_team)
+
+
+            if event.object.message['text'].lower() == 'начать_админ':
+                a = vk_message.method('users.get', {'user_ids': event.object.message['peer_id']})
+                a = a[0]['first_name']
+                vk_message.method("messages.send", {"peer_id": event.object.message['peer_id'],
+                                                    'message': 'Привет, администратор  '+str(a),
+                                                    'random_id': 0, 'keyboard': keyboard_Admin})
 
 
 

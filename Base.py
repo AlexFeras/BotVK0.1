@@ -36,9 +36,9 @@ def getpicture(user_id,ball,debt):
     print(users.head())
     users.loc[users['id'] == user_id, 'баллы'] += ball
     if debt==False:
-        users.loc[users['id'] == user_id, 'дата'] = day_t()
+        users.loc[users['id'] == user_id, 'долги'] = day_t()
     else:
-        users.loc[users['id'] == user_id, 'дата'] -= 1
+        users.loc[users['id'] == user_id, 'долги'] -= 1
     print(users.head())
     users = users.drop('Unnamed: 0', axis=1, errors='ignore')
     users.to_csv('users.csv', sep=';', encoding='windows-1251')
@@ -52,7 +52,7 @@ def Counter():
     teams = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
     t=users.groupby(['команды']).agg({'баллы': 'sum', 'id': 'count'}).reset_index()
     for i in t['команды']:
-        sum_balls = t[t['команды'] == i]['баллы']/day_t() / t[t['команды'] == i]['id']
+        sum_balls = t[t['команды'] == i]['баллы']/2*day_t() / 2*t[t['команды'] == i]['id']
         sum_balls = sum_balls.iloc[0]*100
         if sum_balls == 100:  # над отестить оптимальное количество баллов
             team_ball = 12
