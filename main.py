@@ -56,25 +56,14 @@ if __name__ == "__main__":
 
 
     def photo(user_id, url, group_id, album_id):
-        url=choice(list(vk_photo.method('photos.get',{'owner_id': -group_id,'album_id': 270889038}).items())[1][1])['sizes'][5]['url']
-        a = vk_photo.method("photos.getMessagesUploadServer")
-        file = wget.download(url) # сохраняем файл
-        b = requests.post(a['upload_url'], files={'photo': open(file, 'rb')}).json()
-        c = vk_photo.method('photos.saveMessagesPhoto', {'photo': b['photo'],
-                                                   'server': b['server'],
-                                                   'hash': b['hash']})[0]
-        vk_message.method("messages.send", {"peer_id": user_id, 'message': "Фото",
-                                    "attachment": f'photo{c["owner_id"]}_{c["id"]}',
-                                    'random_id': 0})
-        # для работоспособности кода ниже - необходим standalone token
-        upload_url = vk_photo.method('photos.getUploadServer',
-                               {'group_id': group_id, 'album_id': album_id})['upload_url']
+        file = wget.download(url)
+        upload_url = vk_photo.method('photos.getUploadServer', {'group_id': group_id, 'album_id':
+
+            album_id})['upload_url']
         info = requests.post(upload_url, files={'photo': open(file, 'rb')}).json()
-        vk_photo.method('photos.save', {'server': info['server'],
-                                  'photos_list': info['photos_list'],
-                                  'aid': info['aid'],
-                                  'hash': info['hash'], "album_id": album_id,
-                                  'group_id': group_id})
+        vk_photo.method('photos.save',
+                        {'server': info['server'], 'photos_list': info['photos_list'], 'aid': info['aid'],
+                         'hash': info['hash'], 'group_id': group_id, 'album_id': album_id, 'caption': 'fsfs'})
         os.remove(file)
 
     keyboard = str(json.dumps(keyboard, ensure_ascii=False))# переводим в строковый тип, так как не может принимать словарь
@@ -100,15 +89,15 @@ if __name__ == "__main__":
             if flag == True:
                 if event.object.message['attachments']:
                     if event.object.message['attachments'][0]['type'] == 'photo':  # photo
-                        alb=vk_photo.method('photos.get',{'owner_id':-group_id,'album_id': 270572910}) #рандомная выборка из альбома
+                        #alb=vk_photo.method('photos.get',{'owner_id':-group_id,'album_id': 270572910}) #рандомная выборка из альбома
                         #alb=((vk_photo.method('photos.get',{'owner_id':191601892,'album_id': 270572910})),1)
-                        vk_message.method('messages.send',
-                                  {"peer_id": event.object.message['peer_id'],  # выведет ок если пришло фото
-                                   'attachment': alb,
-                                   'random_id': 0})
-                        url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
-                        messages = vk_message.method("messages.getConversations",
-                                             {'offset': 0, 'count': 20, 'filter': 'unread'})
+                        url = choice(list(vk_photo.method('photos.get', {'owner_id': -group_id, 'album_id': 270572910}).items())[1][1])['sizes'][5]['url']
+                        a = vk_photo.method("photos.getMessagesUploadServer")
+                        file = wget.download(url) # сохраняем файл
+                        b = requests.post(a['upload_url'], files={'photo': open(file, 'rb')}).json()
+                        c = vk_photo.method('photos.saveMessagesPhoto', {'photo': b['photo'], 'server': b['server'], 'hash': b['hash']})[0]
+                        vk_message.method("messages.send", {"peer_id": event.object.message['peer_id'], 'message': "Фото", "attachment": f'photo{c["owner_id"]}_{c["id"]}', 'random_id': 0})
+                        #remove(file)
                         id = event.object.message['peer_id']  # id отправителя
                         body = event.object.message['text']  # сам текст
                         photo(id, url, group_id, album_id)
