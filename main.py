@@ -6,7 +6,7 @@ import wget
 from Base import getpicture, Counter, day_t, hour_t,Counter_d,Data,Debt,Save
 from Admin_function import get_Admin_statistic
 import os
-from random import choice
+from random import choice,sample
 
 
 def get_button(label='but', color='red', payload=''):
@@ -20,7 +20,8 @@ def get_button(label='but', color='red', payload=''):
     }
 
 if __name__ == "__main__":
-
+    token = '66109476bc22807faf8778764497aa3ea03e494967b8f32c5092e24cb4cf035a48cd22563bea5ab9a16fa'
+    acess_token = 'ef2a9e430fc2af0256102ca057db31a108cc2c9316d354b4138aaa74eabe3b5b841a0910c93f7eeff4ad6'
     group_id = 191601892
     album_id = 270167491
     vk_message = vk_api.VkApi(token=token)
@@ -33,8 +34,8 @@ if __name__ == "__main__":
     keyboard = { #создаем клавиатуру
         "one_time": False,
         "buttons": [
-                    [get_button(label="Приветствие", color='positive')],[get_button(label="Сдать работу", color='positive')],
-            [get_button(label="Сдать долг!", color='positive')],[get_button(label="Сдать на конкурс", color='positive')]
+                    [get_button(label="Сдать работу", color='secondary')],[get_button(label="Приветствие", color='positive'),
+            get_button(label="Сдать долг!", color='positive')],[get_button(label="Сдать на конкурс", color='positive')]
                     ]
     }
 
@@ -48,13 +49,15 @@ if __name__ == "__main__":
     keyboard_Admin = {  # создаем клавиатуру Админа
         "one_time": False,
         "buttons": [
-            [get_button(label="Получить статистику за день и за неделю", color='positive')], [get_button(label="Получить таблицу учатстников", color='positive')],
-            [get_button(label="Загрузить таблицу участников", color='positive')], [get_button(label="Очистить группу", color='negative')], [get_button(label="1", color='negative')], [get_button(label="2", color='negative')]
+            [get_button(label="Статистика дня и общая", color='positive')],
+            [get_button(label="Получить таблицу ", color='positive')],[get_button(label="Загрузить команды", color='positive'),get_button(label="Загрузить участников", color='positive')],
+            [get_button(label="Очистить группу", color='negative')], [get_button(label="1", color='negative'), get_button(label="2", color='negative')]
         ]
     }
 
 
     def photo(user_id, url, group_id, album_id):
+        url=choice(list(vk_photo.method('photos.get',{'owner_id': -group_id,'album_id': 270889038}).items())[1][1])['sizes'][5]['url']
         a = vk_photo.method("photos.getMessagesUploadServer")
         file = wget.download(url) # сохраняем файл
         b = requests.post(a['upload_url'], files={'photo': open(file, 'rb')}).json()
@@ -98,10 +101,11 @@ if __name__ == "__main__":
             if flag == True:
                 if event.object.message['attachments']:
                     if event.object.message['attachments'][0]['type'] == 'photo':  # photo
-                        #vk_photo.method('photos.get',{'owner_id':group_id,'album_id': 270572910}) #рандомная выборка из альбома
+                        alb=vk_photo.method('photos.get',{'owner_id':group_id,'album_id': 270572910}) #рандомная выборка из альбома
+                        #alb=((vk_photo.method('photos.get',{'owner_id':191601892,'album_id': 270572910})),1)
                         vk_message.method('messages.send',
                                   {"peer_id": event.object.message['peer_id'],  # выведет ок если пришло фото
-                                   'attachment': choice( vk_photo.method('photos.get',{'owner_id':group_id,'album_id': 270572910}))['response']['sizes'][5]['url'],
+                                   'attachment': alb,
                                    'random_id': 0})
                         url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
                         messages = vk_message.method("messages.getConversations",
