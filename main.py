@@ -20,8 +20,7 @@ def get_button(label='but', color='red', payload=''):
     }
 
 if __name__ == "__main__":
-    token = '66109476bc22807faf8778764497aa3ea03e494967b8f32c5092e24cb4cf035a48cd22563bea5ab9a16fa'
-    acess_token = 'ef2a9e430fc2af0256102ca057db31a108cc2c9316d354b4138aaa74eabe3b5b841a0910c93f7eeff4ad6'
+
     group_id = 191601892
     album_id = 270167491
     vk_message = vk_api.VkApi(token=token)
@@ -101,7 +100,7 @@ if __name__ == "__main__":
             if flag == True:
                 if event.object.message['attachments']:
                     if event.object.message['attachments'][0]['type'] == 'photo':  # photo
-                        alb=vk_photo.method('photos.get',{'owner_id':group_id,'album_id': 270572910}) #рандомная выборка из альбома
+                        alb=vk_photo.method('photos.get',{'owner_id':-group_id,'album_id': 270572910}) #рандомная выборка из альбома
                         #alb=((vk_photo.method('photos.get',{'owner_id':191601892,'album_id': 270572910})),1)
                         vk_message.method('messages.send',
                                   {"peer_id": event.object.message['peer_id'],  # выведет ок если пришло фото
