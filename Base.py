@@ -19,7 +19,7 @@ def Data(id):
 
 def Debt(id):
     users = pd.read_csv('users.csv', sep=';', encoding='windows-1251', engine='python')
-    return users[users['id'] == id]['долги'].iloc[0]
+    return users[users['id'] == id]['Штрафные баллы'].iloc[0]
 
 
 
@@ -35,7 +35,7 @@ def getpicture(user_id,ball,debt):
     team = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
     print(users.head())
     users.loc[users['id'] == user_id, 'баллы'] += ball
-    team.loc[team[team['им команды']==users[users['id'] == user_id]['команды']], 'баллы за день'] += ball
+    team.loc[team[team['команды']==users[users['id'] == user_id]['команды']].loc[0], 'баллы за день'] += ball
     if debt==0:
         users.loc[users['id'] == user_id, 'дата'] = day_t()
     elif debt==1:
@@ -51,9 +51,9 @@ def Counter():
     teams = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
     t=users.groupby(['команды']).agg({'баллы': 'sum', 'id': 'count'}).reset_index()
     for i in t['команды']:
-        sum_balls = t[t['команды'] == i]['баллы']/2*day_t() / 2*t[t['команды'] == i]['id']
+        sum_balls = t[t['команды'] == i]['баллы']/2*day_t() / t[t['команды'] == i]['id']
         sum_balls = sum_balls.iloc[0]*100
-        if sum_balls == 100:  # над отестить оптимальное количество баллов
+        if sum_balls == users[users['команды']==i].shape[0]:  # над отестить оптимальное количество баллов
             team_ball = 12
         elif sum_balls >= 90:
             team_ball = 9
@@ -67,14 +67,17 @@ def Counter():
             team_ball = 5
         else:
             team_ball = 0
-        teams.loc[teams['им команды'] == i, 'баллы общие'] += team_ball
+        teams.loc[teams['Имя команды'] == i, 'баллы общие'] += team_ball
 
     print(teams.head())
 
-def Save(users, teams):
-    users=pd.read_excel(users, encoding='windows-1251')
-    teams = pd.read_excel(teams, encoding='windows-1251')
+def Save(teams,name):
+    teams = pd.read_excel(teams,sep=';',encoding='windows-1251')
+    teams = teams.drop('Unnamed: 0', axis=1, errors='ignore')
+    teams.to_csv(name, sep=';', encoding='windows-1251')
+
+def Delete_us():
+    users = pd.read_csv('users.csv', sep=';', encoding='windows-1251', engine='python')
     users = users.drop('Unnamed: 0', axis=1, errors='ignore')
+    users.drop(users[users['баллы']<=day_t()*2*0.7].index,inplace=True)#если ниже 70 процентов от макс балла, то кик
     users.to_csv('users.csv', sep=';', encoding='windows-1251')
-    teams = users.drop('Unnamed: 0', axis=1, errors='ignore')
-    teams.to_csv('team.csv', sep=';', encoding='windows-1251')
