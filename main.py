@@ -20,7 +20,10 @@ def get_button(label='but', color='red', payload=''):
     }
 
 if __name__ == "__main__":
-
+    token = '9a9ad30a67e452f690d4686a09fea657056708e0f1ceba29d4bf7adcb56fe0e19da50ca201e5ec3964d6a'
+    acess_token = '0de4b58eb1b66554a1640404dc83cce67ed63e2bbd2916e11005db0517ea0e0bf86031ed955977e917ff7'
+    group_id = 191601892
+    album_id = 270167491
     vk_message = vk_api.VkApi(token=token)
     vk_photo = vk_api.VkApi(token=acess_token)
     v = '5.103'#версия приложения
@@ -135,23 +138,28 @@ if __name__ == "__main__":
             if flag == True:
                 if event.object.message['attachments']:
                     if event.object.message['attachments'][0]['type'] == 'photo':  # photo
+                        vk_message.method('messages.getConversations',
+                                          {"peer_id": event.object.message['peer_id'],  # выведет ок если пришло фото
+                                           'message': " Пришло фото!",
+                                           'random_id': 0})
                         url = event.object.message['attachments'][0]['photo']['sizes'][5]['url']
-                        a = vk_photo.method("photos.getMessagesUploadServer")
-                        file = wget.download(url) # сохраняем файл
-                        b = requests.post(a['upload_url'], files={'photo': open(file, 'rb')}).json()
-                        c = vk_photo.method('photos.saveMessagesPhoto', {'photo': b['photo'], 'server': b['server'], 'hash': b['hash']})[0]
-                        vk_message.method("messages.send", {"peer_id": event.object.message['peer_id'], 'message': "Фото", 'random_id': 0})
-                        #remove(file)
+                        messages = vk_message.method("messages.getConversations",
+                                                     {'offset': 0, 'count': 20, 'filter': 'unread'})
+                        file = wget.download(url)
                         id = event.object.message['peer_id']  # id отправителя
                         body = event.object.message['text']  # сам текст
                         photo(id, url, group_id, album_id)
                         if flag2 == 0: #до 22 часов
                             getpicture(event.object.message['peer_id'], 2, False)
+                            vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                                'message': "Отлично, работа принята!",
+                                                                'random_id': 0})
                         if flag2 == 1:# медлу 22-00 и 23-00
                             getpicture(event.object.message['peer_id'], 1, False)
                         if flag2 == 2:#опоздал
                             getpicture(event.object.message['peer_id'], 0, False)
                         Counter()
+                        os.remove(file)
                         flag = False
             if flag1 == True:
                 if event.object.message['attachments']:
@@ -236,22 +244,22 @@ if __name__ == "__main__":
                                              'random_id': 0})
                 flag_C = True
 
-            elif "Admin" in event.object.message['text']:  # если нажать на кнопку, то проиходйет это
-
-                if event.object.message['attachments'][0]['type'] == 'Docs':  #новая база
-                    url_users = event.object.message['attachments']['document']['url']
-                    url_team  = event.object.message['attachments']['document']['url']
-                    a = vk_photo.method("photos.getMessagesUploadServer") # поулчить стандалон для фото и документов
-                    file_users = wget.download(url_users)  # сохраняем файл
-                    file_team = wget.download(url_team)
-                    b1 = requests.post(a['upload_url'], files={'file': open(file_users, 'rb')}).json()
-                    b2 = requests.post(a['upload_url'], files={'file': open(file_team, 'rb')}).json()
-                    c = vk_photo.method('photos.save', {'Docs': b1["file"],
-                                                                     'server': b1['server'],
-                                                                     'hash': b1['hash']})[0]
-                    Save(file_users, file_team)
-                    os.remove(file_users)
-                    os.remove(file_team)
+            # elif "Admin" in event.object.message['text']:  # если нажать на кнопку, то проиходйет это
+            #
+            #     if event.object.message['attachments'][0]['type'] == 'Docs':  #новая база
+            #         url_users = event.object.message['attachments']['document']['url']
+            #         url_team  = event.object.message['attachments']['document']['url']
+            #         a = vk_photo.method("photos.getMessagesUploadServer") # поулчить стандалон для фото и документов
+            #         file_users = wget.download(url_users)  # сохраняем файл
+            #         file_team = wget.download(url_team)
+            #         b1 = requests.post(a['upload_url'], files={'file': open(file_users, 'rb')}).json()
+            #         b2 = requests.post(a['upload_url'], files={'file': open(file_team, 'rb')}).json()
+            #         c = vk_photo.method('photos.save', {'Docs': b1["file"],
+            #                                                          'server': b1['server'],
+            #                                                          'hash': b1['hash']})[0]
+            #         Save(file_users, file_team)
+            #         os.remove(file_users)
+            #         os.remove(file_team)
 
 
             elif event.object.message['text'].lower() == 'начать_админ': # второй обработчик событий

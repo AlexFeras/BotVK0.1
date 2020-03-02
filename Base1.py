@@ -7,7 +7,7 @@ def day_t(): # передает актуальный день
     #print (days)
     return days
 
-def hour_t(): # передает актуальный день
+def hour_t(): # передает актуальный час(внутри перевод в минуты)
     today = datetime.today()
     hour=today.hour*60+today.minute
     #print (days)
@@ -52,23 +52,9 @@ def Counter():
     teams = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
     t=users.groupby(['команда']).agg({'баллы': 'sum', 'id': 'count'}).reset_index()
     for i in t['команда']:
-        sum_balls = t[t['команда'] == i]['баллы']/2*day_t() / t[t['команда'] == i]['id']
-        sum_balls = sum_balls.iloc[0]*100
-        if sum_balls == users[users['команда']==i].shape[0]:  # над отестить оптимальное количество баллов
-            team_ball = 12
-        elif sum_balls >= 90:
-            team_ball = 9
-        elif sum_balls > 80:
-            team_ball = 8
-        elif sum_balls > 70:
-            team_ball = 7
-        elif sum_balls > 60:
-            team_ball = 6
-        elif  sum_balls > 50:
-            team_ball = 5
-        else:
-            team_ball = 0
-        teams.loc[teams['команда'] == i, 'баллы общие'] += team_ball
+        sum_balls = t[t['команда'] == i]['баллы']/ 2*t[t['команда'] == i]['id'] # как сделать так,чтобы в 23-00 он очищал столбик и по новой заполнял в след день.
+        sum_balls = sum_balls.iloc[0]*10
+        teams.loc[teams['команда'] == i, 'баллы общие'] += sum_balls
 
     print(teams.head())
 
@@ -80,5 +66,5 @@ def Save(teams,name):
 def Delete_us():
     users = pd.read_csv('users.csv', sep=';', encoding='windows-1251', engine='python')
     users = users.drop('Unnamed: 0', axis=1, errors='ignore')
-    users.drop(users[users['баллы']<=day_t()*2*0.7].index,inplace=True)#если ниже 70 процентов от макс балла, то кик
+    users.drop(users[users['баллы']<=day_t()*2*0.7].index,inplace=True)#СДЕЛАТЬ 3 ПРОПУСКА ИЛИ 6 ОПОЗДАНИЙ И КИК
     users.to_csv('users.csv', sep=';', encoding='windows-1251')
