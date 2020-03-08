@@ -54,7 +54,7 @@ def Counter():
     for i in t['команда']:
         sum_balls = t[t['команда'] == i]['баллы']/2*day_t() / t[t['команда'] == i]['id']
         sum_balls = sum_balls.iloc[0]*100
-        if sum_balls == users[users['команда']==i].shape[0]:  # над отестить оптимальное количество баллов
+        if sum_balls == users[users['команда']==i].shape[0]:
             team_ball = 12
         elif sum_balls >= 90:
             team_ball = 9
