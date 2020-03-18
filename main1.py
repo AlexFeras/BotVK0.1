@@ -4,8 +4,12 @@ import json
 import requests
 import wget
 from Base1 import getpicture, Counter, day_t, hour_t,Counter_d,Data,Debt,Save,user_in_base,Delete_us
+from google import *
 from Admin_function import get_Admin_statistic,Get_stat,Info_debt,chellenge
 import os
+from oauth2client.service_account import ServiceAccountCredentials
+import httplib2
+import apiclient
 from random import choice,sample
 
 
@@ -123,45 +127,13 @@ if __name__ == "__main__":# будет 2 группы или передават�
                     vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                         'message': Get_stat(),
                                                         'random_id': 0})
-                elif 'Загрузить файл user' in event.object.message['text']:
-                    vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
-                                                        'message': 'Загружай',
-                                                        'random_id': 0})
-                    Admin_app_team(vk, 'user.csv',True)
-                elif 'Загрузить файл team' in event.object.message['text']:# ГОТОВО
-                    vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
-                                                        'message': 'Загружай',
-                                                        'random_id': 0})
-                    Admin_app_team(vk, 'user.csv',True)
-                elif 'Получить users' in event.object.message['text']:#  ГОТОВО
-                    upload_url = vk_photo.method('docs.getMessagesUploadServer',
-                                                 {'type': 'doc',
-                                                  'peer_id': event.object.message['peer_id']})['upload_url']
 
-                    result = requests.post(upload_url, files={'file': open('users.csv', 'rb')}).json()
-                    tmp = vk_photo.method('docs.save', {'file': result['file'], 'title': 'users'})['doc']
-                    messages = vk_message.method('messages.send',
-                                                 {'user_id': event.object.message['peer_id'],
-                                                  'attachment': f'doc{tmp["owner_id"]}_{tmp["id"]}',
-                                                  'random_id': 0,
-                                                  'message': tmp['url']})
-                elif 'Получить teams' in event.object.message['text']:  # доделать длля teams
-                    upload_url = vk_photo.method('docs.getMessagesUploadServer',
-                                                 {'type': 'doc',
-                                                  'peer_id': event.object.message['peer_id']})['upload_url']
-
-                    result = requests.post(upload_url, files={'file': open('users.csv', 'rb')}).json()
-                    tmp = vk_photo.method('docs.save', {'file': result['file'], 'title': 'users'})['doc']
-                    messages = vk_message.method('messages.send',
-                                                 {'user_id': event.object.message['peer_id'],
-                                                  'attachment': f'doc{tmp["owner_id"]}_{tmp["id"]}',
-                                                  'random_id': 0,
-                                                  'message': tmp['url']})
                 elif 'Начать челлендж' in event.object.message['text']:# ГОТОВО
                     for i, g, k in get_Admin_statistic():
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                             'message': f'{i} {g} {k}',
                                                             'random_id': 0})
+                        Competition(apib,spredsheetid)
                 elif 'Получить результаты челленджа' in event.object.message['text']: #ГОТОВО НЕОБХОДИМО ПОЛУЧИТЬ КАКИЕ УЧАСТНИКИ И ИЗ КАКОЙ КОМАНДЫ. ИМЯ И ID
                     for i in chellenge():
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
@@ -196,7 +168,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
                 flag2 = 1
             elif hour_t() >= 1385:
                 if flag2 != 0:
-
+                    Counter() # считает раз в день
                     flag2 = 0
                     album_id = vk_photo.method('photos.createAlbum',
                                                {'title': str(day_t() + 1) + " День", 'group_id': group_id})['id']
@@ -231,7 +203,6 @@ if __name__ == "__main__":# будет 2 группы или передават�
                                                                 'random_id': 0})
                         if flag2 == 2:#опоздал
                             getpicture(event.object.message['peer_id'], 0, False)
-                        Counter()
                         os.remove(file)
             break
     def debt_daylik(vk,keyboard):
@@ -255,7 +226,6 @@ if __name__ == "__main__":# будет 2 группы или передават�
                             vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                                 'message': "Отлично, долг принят!",
                                                                 'random_id': 0})
-                        Counter()
                    break
     def daylik_competition(vk,keyboard):
             longpoll = VkBotLongPoll(vk, group_id)
@@ -284,6 +254,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
 
 
     longpoll = VkBotLongPoll(vk_message, group_id) #событие, наблюдаем за некоторой событийной модель
+    tmp = type('vk', (), {'object': type('mes', (), {'message': {'peer_id': 0, 'id': 0}})})
     for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW:
             if user_in_base(event.object.message['peer_id']):
@@ -311,24 +282,27 @@ if __name__ == "__main__":# будет 2 группы или передават�
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                  'message': "Загружай!",
                                                  'random_id': 0})
-                        daylik(vk_message,keyboard,album_id)
-                        continue
+
+                        tmp = daylik(vk_message, keyboard, album_id)
                 elif ("Загрузить долг!" in event.object.message['text']) or ("2" in event.object.message['text']):  # если нажать на кнопку, то проиходйет это
                     if Debt(event.object.message['peer_id']) <=0:
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                             'message': "Вы сдали все долги!",
                                                             'random_id': 0})
+
                     else:
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                             'message': "Загружайте долг",
                                                             'random_id': 0})
                         debt_daylik(vk_message,keyboard)
+                        tmp = event
                 elif ("Загрузить на батл" in event.object.message['text']) or ("3" in event.object.message['text']):
 
                     vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
-                                                 'message': "Загружай на конкурс",
+                                                 'message': "Загружай на батл",
                                                  'random_id': 0})
                     daylik_competition(vk_message,keyboard)
+                    tmp = event
 
 
 
