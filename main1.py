@@ -14,6 +14,11 @@ from random import choice,sample
 
 
 if __name__ == "__main__":# будет 2 группы или передавать токен через ексель или как то иначе!!!!
+    MyBot = 'Mybot-9655a9770da5.json'
+    Credentials = ServiceAccountCredentials(MyBot, ['googleapis.com/auth/drive','googleapis.com/auth/spreadsheets']) #сформировали запрос
+    Authorize=Credentials.authorize(httplib2.Http()) # отсылаем запрос выше и авторизируемся
+    apib = apiclient.discovery.build('sheets', 'v4', http=Authorize)# обращаемся к конкретному апи и указываем его ваерсию, отсылаем токен авторизации
+    spredsheetid = '1YL1pTud53TsPTPbL81aSOJjNclyDq1n-xpDbyRcjMTI'
 
     group_id = 191601892
     album_id = 270167491
