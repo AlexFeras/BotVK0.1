@@ -18,8 +18,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
     Authorize=Credentials.authorize(httplib2.Http()) # отсылаем запрос выше и авторизируемся
     apib = apiclient.discovery.build('sheets', 'v4', http=Authorize)# обращаемся к конкретному апи и указываем его ваерсию, отсылаем токен авторизации
     spreadsheetid = '1YL1pTud53TsPTPbL81aSOJjNclyDq1n-xpDbyRcjMTI'
-    token = '9a9ad30a67e452f690d4686a09fea657056708e0f1ceba29d4bf7adcb56fe0e19da50ca201e5ec3964d6a'
-    acess_token = 'e5245d9edad70eedbfa3317b4aceeed6c2a3b8f59d963d1f8f05b94c0514a8fc5d7b0598ba304446221bc'
+
     group_id = 191601892
     album_id = 270167491
     vk_message = vk_api.VkApi(token=token)
