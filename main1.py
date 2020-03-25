@@ -3,8 +3,8 @@ from vk_api.bot_longpoll import VkBotLongPoll, VkBotEventType
 import json
 import requests
 import wget
-from Base1 import getpicture, Counter, day_t, hour_t,Counter_d,Data,Debt,Save,user_in_base,Delete_us
-from google import *
+#from Base1 import getpicture, Counter, day_t, hour_t,Counter_d,Data,Debt,Save,user_in_base,Delete_us
+from ggle import *
 from Admin_function import get_Admin_statistic,Get_stat,Info_debt,chellenge
 import os
 from oauth2client.service_account import ServiceAccountCredentials
@@ -12,14 +12,14 @@ import httplib2
 import apiclient
 from random import choice,sample
 
-
 if __name__ == "__main__":# будет 2 группы или передавать токен через ексель или как то иначе!!!!
     MyBot = 'Mybot-9655a9770da5.json'
-    Credentials = ServiceAccountCredentials(MyBot, ['googleapis.com/auth/drive','googleapis.com/auth/spreadsheets']) #сформировали запрос
+    Credentials = ServiceAccountCredentials.from_json_keyfile_name(MyBot, ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']) #сформировали запрос
     Authorize=Credentials.authorize(httplib2.Http()) # отсылаем запрос выше и авторизируемся
     apib = apiclient.discovery.build('sheets', 'v4', http=Authorize)# обращаемся к конкретному апи и указываем его ваерсию, отсылаем токен авторизации
-    spredsheetid = '1YL1pTud53TsPTPbL81aSOJjNclyDq1n-xpDbyRcjMTI'
-
+    spreadsheetid = '1YL1pTud53TsPTPbL81aSOJjNclyDq1n-xpDbyRcjMTI'
+    token = '9a9ad30a67e452f690d4686a09fea657056708e0f1ceba29d4bf7adcb56fe0e19da50ca201e5ec3964d6a'
+    acess_token = 'e5245d9edad70eedbfa3317b4aceeed6c2a3b8f59d963d1f8f05b94c0514a8fc5d7b0598ba304446221bc'
     group_id = 191601892
     album_id = 270167491
     vk_message = vk_api.VkApi(token=token)
@@ -44,7 +44,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
     keyboard = { #создаем клавиатуру
         "one_time": False,
         "buttons": [
-                    [get_button(label="Загрузить работу", color='secondary')],
+            [get_button(label="Загрузить работу", color='secondary')],
             [get_button(label="Загрузить долг!", color='secondary'), get_button(label="Загрузить на батл", color='secondary')],[get_button(label="Правила", color='secondary')]
                     ]
     }
@@ -60,7 +60,6 @@ if __name__ == "__main__":# будет 2 группы или передават�
         "one_time": False,
         "buttons": [
             [get_button(label="Статистика дня и общая", color='secondary')],
-            [get_button(label="Получить users", color='secondary'),get_button(label="Получить teams", color='secondary')],[get_button(label="Загрузить файл team", color='secondary'),get_button(label="Загрузить файл user", color='secondary')],
             [get_button(label="Начать челлендж", color='secondary'),get_button(label="Получить результаты челленджа", color='secondary')],
             [get_button(label="Очистить группу", color='negative')], [get_button(label="Назад", color='positive')]
         ]
@@ -96,19 +95,19 @@ if __name__ == "__main__":# будет 2 группы или передават�
                     if event.object.message['attachments'][0]['type'] == 'doc':  # новая база
                         url_team = event.object.message['attachments'][0]['doc']['url']
                         file_team = wget.download(url_team)
-                        Save(file_team,name)
+                        #Save(file_team,name)
                         os.remove(file_team)
                         break
                 elif len(event.object.message['attachments']) and both == False:
                     if event.object.message['attachments'][0]['type'] == 'doc':  # новая база
                         url_team = event.object.message['attachments'][0]['doc']['url']
                         file_team = wget.download(url_team)
-                        Save(file_team, 'user.csv')
+                        #Save(file_team, 'user.csv')
                         os.remove(file_team)
                     if event.object.message['attachments'][1]['type'] == 'doc':  # новая база
                         url_team = event.object.message['attachments'][1]['doc']['url']
                         file_team = wget.download(url_team)
-                        Save(file_team, 'team.scv')
+                        #Save(file_team, 'team.scv')
                         os.remove(file_team)
                 else: break
     def Admin(vk,keyboard_Admin):
@@ -134,11 +133,11 @@ if __name__ == "__main__":# будет 2 группы или передават�
                                                         'random_id': 0})
 
                 elif 'Начать челлендж' in event.object.message['text']:# ГОТОВО
-                    for i, g, k in get_Admin_statistic():
-                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
-                                                            'message': f'{i} {g} {k}',
-                                                            'random_id': 0})
-                        Competition(apib,spredsheetid)
+                    #for i, g, k in get_Admin_statistic():
+                        # vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                        #                                     'message': f'{i} {g} {k}',
+                        #                                     'random_id': 0})
+                    Competition(apib,spreadsheetid)
                 elif 'Получить результаты челленджа' in event.object.message['text']: #ГОТОВО НЕОБХОДИМО ПОЛУЧИТЬ КАКИЕ УЧАСТНИКИ И ИЗ КАКОЙ КОМАНДЫ. ИМЯ И ID
                     for i in chellenge():
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
@@ -180,7 +179,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
             else:
                 if flag2 != 0:
                     Counter_d()
-                    Delete_us()
+                    #Delete_us()
                     flag2 = 0
             if event.type == VkBotEventType.MESSAGE_NEW:
                 if event.object.message['attachments']:
@@ -197,17 +196,17 @@ if __name__ == "__main__":# будет 2 группы или передават�
                         body = event.object.message['text']  # сам текст
                         photo(body,id, url, group_id, album_id)
                         if flag2 == 0: #до 22 часов
-                            getpicture(event.object.message['peer_id'], 2, False)
+                            getpicture(event.object.message['peer_id'], 2, False,apib,spreadsheetid)
                             vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                                 'message': "Отлично, работа принята!",
                                                                 'random_id': 0})
                         if flag2 == 1:# медлу 22-00 и 23-00
-                            getpicture(event.object.message['peer_id'], 1, False)
+                            getpicture(event.object.message['peer_id'], 1, False,apib,spreadsheetid)
                             vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                                 'message': "Отлично, работа принята! Не опаздывай больше)",
                                                                 'random_id': 0})
                         if flag2 == 2:#опоздал
-                            getpicture(event.object.message['peer_id'], 0, False)
+                            getpicture(event.object.message['peer_id'], 0, False,apib,spreadsheetid)
                         os.remove(file)
             break
     def debt_daylik(vk,keyboard):
@@ -227,7 +226,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
                             id = event.object.message['peer_id']  # id отправителя
                             body = event.object.message['text']  # сам текст
                             photo(body,id, url, group_id, album_id)
-                            getpicture(event.object.message['peer_id'], 0.5, True)
+                            getpicture(event.object.message['peer_id'], 0.5, True,apib,spreadsheetid)
                             vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                                 'message': "Отлично, долг принят!",
                                                                 'random_id': 0})
@@ -251,7 +250,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
                             album_Com_id = vk_photo.method('photos.createAlbum',# создает альбом для конкурсов
                                                        {'title': str(day_t() + 1) + " День. Конкурсы, ", 'group_id': group_id})['id']
                             photo(body,id, url, group_id, album_Com_id)
-                            getpicture(event.object.message['peer_id'], 0, 2)
+                            getpicture(event.object.message['peer_id'], 0, 2,apib,spreadsheetid)
                             vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                                 'message': "Отлично, работа принята!",
                                                                 'random_id': 0})
@@ -262,7 +261,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
     tmp = type('vk', (), {'object': type('mes', (), {'message': {'peer_id': 0, 'id': 0}})})
     for event in longpoll.listen():
         if event.type == VkBotEventType.MESSAGE_NEW:
-            if user_in_base(event.object.message['peer_id']):
+            if user_in_base(event.object.message['peer_id'],apib,spreadsheetid):
                 if event.object.message['text'].lower() == 'начать':# обратились к сообщению, образаемся к "тексту"
                     a = vk_message.method('users.get', {'user_ids': event.object.message['peer_id']})
                     a = a[0]['first_name']
@@ -278,7 +277,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
                                                             'message': "https://vk.com/public191601892?w=wall-191601892_2", # тут правила
                                                             'random_id': 0})
                 elif ("Загрузить работу" in event.object.message['text']) or ("1" in event.object.message['text']):## Как сделать так,чтобы бот передавал комментарий к рисунку вместе с рисуноком
-                     if Data(event.object.message['peer_id'])==day_t():
+                     if Data(event.object.message['peer_id'],apib,spreadsheetid)==day_t():
                          vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                              'message': "Вы уже сдавали работу! Ждём вас завтра!",
                                                              'random_id': 0})
@@ -290,7 +289,7 @@ if __name__ == "__main__":# будет 2 группы или передават�
 
                         tmp = daylik(vk_message, keyboard, album_id)
                 elif ("Загрузить долг!" in event.object.message['text']) or ("2" in event.object.message['text']):  # если нажать на кнопку, то проиходйет это
-                    if Debt(event.object.message['peer_id']) <=0:
+                    if Debt(event.object.message['peer_id'],apib,spreadsheetid) <=0:
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                             'message': "Вы сдали все долги!",
                                                             'random_id': 0})

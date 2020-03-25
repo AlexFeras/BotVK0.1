@@ -1,5 +1,6 @@
 import pandas as pd
 from Base import getpicture, Counter, day_t, hour_t,Counter_d,Data,Debt,Save
+
 def get_Admin_statistic(t=None):
     team = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
     users = pd.read_csv('users.csv', sep=';', encoding='windows-1251', engine='python')
@@ -40,6 +41,7 @@ def chellenge():
     users=users[users['На конкурс']!=0]
     for index, row in users.sort_values('На конкурс', ascending=False).reset_index(drop=True).iterrows():
         yield f' Команда {row["команда"]} \n Баллы на конкурс {row["На конкурс"]} \n @id{row["id"]}'
+
 
 
 
