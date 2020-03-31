@@ -1,14 +1,15 @@
 import pandas as pd
 from Base import getpicture, Counter, day_t, hour_t,Counter_d,Data,Debt,Save
 
-def get_Admin_statistic(t=None):
-    team = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
-    users = pd.read_csv('users.csv', sep=';', encoding='windows-1251', engine='python')
-    if t != None:
-        t=list(users.loc[users['id']==t, 'команда'])[0]
-        team=team[team["команда"]==t]
-    for index,row in team.sort_values('баллы общие',ascending=False).reset_index(drop=True).iterrows():
-        yield f' Команда {row["команда"]} \n Баллы за день {row["баллы за день"]} \n Общие баллы {row["баллы общие"]}'
+# def get_Admin_statistic(t=None):
+#     team = pd.read_csv('team.csv', sep=';', encoding='windows-1251', engine='python')
+#     users = pd.read_csv('users.csv', sep=';', encoding='windows-1251', engine='python')
+#     if t != None:
+#         t=list(users.loc[users['id']==t, 'команда'])[0]
+#         team=team[team["команда"]==t]
+#     for index,row in team.sort_values('баллы общие',ascending=False).reset_index(drop=True).iterrows():
+#         yield f' Команда {row["команда"]} \n Баллы за день {row["баллы за день"]} \n Общие баллы {row["баллы общие"]}'
+
 
 
 def Get_stat(t=None): # для админа ничего не передавать в параметр, для старосты команду
