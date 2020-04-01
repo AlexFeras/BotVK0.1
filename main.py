@@ -20,8 +20,7 @@ def get_button(label='but', color='red', payload=''):
     }
 
 if __name__ == "__main__":
-    token = '9a9ad30a67e452f690d4686a09fea657056708e0f1ceba29d4bf7adcb56fe0e19da50ca201e5ec3964d6a'
-    acess_token = '0de4b58eb1b66554a1640404dc83cce67ed63e2bbd2916e11005db0517ea0e0bf86031ed955977e917ff7'
+
     group_id = 191601892
     album_id = 270167491
     vk_message = vk_api.VkApi(token=token)

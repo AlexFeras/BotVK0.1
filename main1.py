@@ -11,11 +11,6 @@ import googleapiclient.discovery
 from random import choice,sample
 
 if __name__ == "__main__": # будет 2 группы или передавать токен через ексель или как то иначе!!!!
-    MyBot = 'Mybot-9655a9770da5.json'
-    Credentials = ServiceAccountCredentials.from_json_keyfile_name(MyBot, ['https://www.googleapis.com/auth/drive', 'https://www.googleapis.com/auth/spreadsheets']) #сформировали запрос
-    Authorize=Credentials.authorize(httplib2.Http()) # отсылаем запрос выше и авторизируемся
-    apib = googleapiclient.discovery.build('sheets', 'v4', http=Authorize)# обращаемся к конкретному апи и указываем его ваерсию, отсылаем токен авторизации
-    spreadsheetid = '1YL1pTud53TsPTPbL81aSOJjNclyDq1n-xpDbyRcjMTI'
 
     group_id = 191601892
     album_id = 270167491
@@ -46,7 +41,6 @@ if __name__ == "__main__": # будет 2 группы или передават
             [get_button(label="Загрузить долг!", color='secondary'), get_button(label="Загрузить на батл", color='secondary')],[get_button(label="Правила", color='secondary')]
                     ]
     }
-
     keyboard_Leader = {
         "one_time": False,
         "buttons": [
@@ -68,7 +62,6 @@ if __name__ == "__main__": # будет 2 группы или передават
     keyboard_Leader = str(json.dumps(keyboard_Leader, ensure_ascii=False))
     keyboard_Admin = str(json.dumps(keyboard_Admin, ensure_ascii=False))
 
-    def main_buttons(vk,keyboard):
 
     def Leader(vk,keyboard_Leader):
         longpoll = VkBotLongPoll(vk, group_id)
@@ -79,11 +72,47 @@ if __name__ == "__main__": # будет 2 группы или передават
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                             'message': i,
                                                             'random_id': 0})
-                if 'Статистика дня' in event.object.message['text']:
+                elif 'Статистика дня' in event.object.message['text']:
                     for i in get_day_statistic(0, apib, spreadsheetid):
                         vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
                                                             'message': i,
                                                             'random_id': 0})
+                elif ("Загрузить работу" in event.object.message['text']) or ("1" in event.object.message[
+                    'text']):  ## Как сделать так,чтобы бот передавал комментарий к рисунку вместе с рисуноком
+                    if Data(event.object.message['peer_id'], apib, spreadsheetid) == day_t():
+                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                            'message': "Вы уже сдавали работу! Ждём вас завтра!",
+                                                            'random_id': 0})
+                    else:
+
+                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                            'message': "Загружай!",
+                                                            'random_id': 0})
+
+                        tmp = daylik(vk_message, keyboard, album_id)
+                elif ("Загрузить долг!" in event.object.message['text']) or (
+                        "2" in event.object.message['text']):  # если нажать на кнопку, то проиходйет это
+                    if Debt(event.object.message['peer_id'], apib, spreadsheetid) <= 0:
+                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                            'message': "Вы сдали все долги!",
+                                                            'random_id': 0})
+
+                    else:
+                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                            'message': "Загружайте долг",
+                                                            'random_id': 0})
+                        tmp = debt_daylik(vk_message, keyboard)
+                elif ("Загрузить на батл" in event.object.message['text']) or ("3" in event.object.message['text']):
+
+                    vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                        'message': "Загружай на батл",
+                                                        'random_id': 0})
+                    tmp = daylik_competition(vk_message, keyboard)
+                elif ("Правила" in event.object.message['text']) or ("0" in event.object.message['text']):  # НЕ ГОТОВО
+                    vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                        'message': "https://vk.com/public191601892?w=wall-191601892_2",
+                                                        # тут правила
+                                                        'random_id': 0})
                 elif 'Назад' in event.object.message['text']:
                     break
 
@@ -279,13 +308,6 @@ if __name__ == "__main__": # будет 2 группы или передават
                     vk_message.method("messages.send", {"peer_id": event.object.message['peer_id'],
                                                 'message': ' Нажми на кнопку или напиши необходимую команду,если кнопки не работают \n 0.Правила. \n 1. Загрузить работу.\n 2.Загрузить долг!.\n 3. Загрузить на батл',
                                                 'random_id': 0, 'keyboard': keyboard})
-
-
-
-                elif ("Правила" in event.object.message['text']) or ("0" in event.object.message['text']):  # НЕ ГОТОВО
-                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
-                                                            'message': "https://vk.com/public191601892?w=wall-191601892_2", # тут правила
-                                                            'random_id': 0})
                 elif ("Загрузить работу" in event.object.message['text']) or ("1" in event.object.message['text']):## Как сделать так,чтобы бот передавал комментарий к рисунку вместе с рисуноком
                      if Data(event.object.message['peer_id'],apib,spreadsheetid)==day_t():
                          vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
@@ -315,6 +337,10 @@ if __name__ == "__main__": # будет 2 группы или передават
                                                  'message': "Загружай на батл",
                                                  'random_id': 0})
                     tmp=daylik_competition(vk_message,keyboard)
+                elif ("Правила" in event.object.message['text']) or ("0" in event.object.message['text']):  # НЕ ГОТОВО
+                        vk_message.method('messages.send', {"peer_id": event.object.message['peer_id'],
+                                                            'message': "https://vk.com/public191601892?w=wall-191601892_2", # тут правила
+                                                            'random_id': 0})
                 elif event.object.message['text'].lower() == 'начать_староста': #староста БУДЕТ ЛИ ОН ПРИНИМАТЬ УЧАСТИЕ В ДЕЙЛИКАХ? НАДО ЛИ ДОБАВИТЬ СЮДА ФУНКЦЙИИ ИЛИ ВСЁ И ТАК БУДЕТ РАБОТАТЬ?
                     a = vk_message.method('users.get', {'user_ids': event.object.message['peer_id']})
                     a = a[0]['first_name']
